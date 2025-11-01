@@ -1,6 +1,7 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
-import { FaPlane, FaCogs, FaClipboardList, FaVial, FaFileAlt, FaUserShield, FaSignOutAlt } from 'react-icons/fa'
+import { Link, useLocation } from 'react-router-dom'
+import { FaTimes, FaPlane, FaCogs, FaClipboardList, FaVial, FaFileAlt, FaUserShield, FaSignOutAlt } from 'react-icons/fa'
+
 
 // Roles
 type NivelPermissao = 'ADMINISTRADOR' | 'ENGENHEIRO' | 'OPERADOR'
@@ -11,6 +12,10 @@ interface User {
     nivelPermissao: NivelPermissao
 }
 
+interface SidebarProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
 
 interface SidebarItem {
     name: string
@@ -35,9 +40,10 @@ const navigationItems: SidebarItem[] = [
     { name: 'Administração', icon: <FaUserShield />, path: '/admin/users', minPermission: 'ADMINISTRADOR' },
 ]
 
-const Sidebar: React.FC = () => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     // No projeto real: const { user } = useAuth()
     const user = mockUser
+    const location = useLocation()
 
     const userCanAccess = (minPermission: NivelPermissao): boolean => {
         if (!user) return false
@@ -50,16 +56,29 @@ const Sidebar: React.FC = () => {
         
         return hierarchy[user.nivelPermissao] >= hierarchy[minPermission]
     }
-    
+
+    const baseClasses = "fixed top-0 left-0 h-full w-64 bg-white shadow-2xl z-40 flex flex-col border-r border-gray-100 transition-transform duration-300 ease-in-out";
+    const responsiveClasses = isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0";
     return (
+        <>
+        {isOpen && (
+                <div
+                    onClick={onClose}
+                    className="fixed inset-0 bg-black opacity-50 z-30 lg:hidden"
+                    aria-hidden="true"
+                />
+            )}
         <aside
-            className="fixed top-0 left-0 h-full w-64 bg-white z-30 flex flex-col border-r border-gray-100"
-            aria-label="Barra Lateral de Navegação Principal da Aerocode"
-        >
-            {/* Topo da Sidebar: Logo */}
-            <div className="p-4 border-b border-gray-100 h-20 flex items-center justify-center">
-                <span className="text-xl text-gray-800 font-mono font-bold">aerocode</span>
-            </div>
+           className={`${baseClasses} ${responsiveClasses} lg:translate-x-0 lg:shadow-xl`}
+                aria-label="Barra Lateral de Navegação Principal da Aerocode"
+            >
+    
+            {/* Topo da Sidebar: Logo e Botão Fechar (Mobile) */}
+                <div className="p-4 border-b border-gray-100 h-20 flex items-center justify-between">
+                    <span className="text-xl text-gray-800 font-mono font-bold">aerocode</span>
+                    <button onClick={onClose} className="lg:hidden p-2 rounded-full hover:bg-gray-100">
+                    </button>
+                </div>
 
             {/* Links de Navegação */}
             <nav className="flex-grow p-2 space-y-1">
@@ -102,6 +121,7 @@ const Sidebar: React.FC = () => {
                 </button>
             </div>
         </aside>
+        </>
     )
 }
 export default Sidebar
