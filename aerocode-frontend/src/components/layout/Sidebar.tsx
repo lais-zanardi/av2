@@ -1,22 +1,20 @@
-// src/components/layout/Sidebar.tsx
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { FaPlane, FaCogs, FaClipboardList, FaVial, FaFileAlt, FaUserShield } from 'react-icons/fa'
+import { FaPlane, FaCogs, FaClipboardList, FaVial, FaFileAlt, FaUserShield, FaSignOutAlt } from 'react-icons/fa'
 
 // Roles
 type NivelPermissao = 'ADMINISTRADOR' | 'ENGENHEIRO' | 'OPERADOR'
 
-// Definição da interface do usuário 
 interface User {
     id: number
     name: string
     nivelPermissao: NivelPermissao
 }
 
-// Interface para os itens da Sidebar
+
 interface SidebarItem {
     name: string
-    icon: React.ReactNode // Usamos ReactNode para ícones (poderia ser SVG ou componente)
+    icon: React.ReactNode
     path: string
     minPermission: NivelPermissao
 }
@@ -25,13 +23,8 @@ interface SidebarItem {
 const mockUser: User = {
     id: 1,
     name: 'Gerson Penha',
-    nivelPermissao: 'ENGENHEIRO', // Troque aqui para testar diferentes permissões
+    nivelPermissao: 'ADMINISTRADOR', // Troque aqui para testar diferentes permissões
 }
-
-
-// ----------------------------------------------------------------------
-// 1. Definição dos Itens de Navegação (Baseado no Plano de Módulos)
-// ----------------------------------------------------------------------
 
 const navigationItems: SidebarItem[] = [
     { name: 'Aeronaves', icon: <FaPlane />, path: '/aeronaves', minPermission: 'ENGENHEIRO' },
@@ -42,17 +35,11 @@ const navigationItems: SidebarItem[] = [
     { name: 'Administração', icon: <FaUserShield />, path: '/admin/users', minPermission: 'ADMINISTRADOR' },
 ]
 
-
-// ----------------------------------------------------------------------
-// 2. Componente Principal Sidebar
-// ----------------------------------------------------------------------
-
 const Sidebar: React.FC = () => {
     // No projeto real: const { user } = useAuth()
     const user = mockUser
 
     const userCanAccess = (minPermission: NivelPermissao): boolean => {
-        console.log('Sidebar renderizada');
         if (!user) return false
         
         const hierarchy = {
@@ -65,29 +52,30 @@ const Sidebar: React.FC = () => {
     }
     
     return (
-        <aside 
-        className="bg-red-500 p-10 text-white"
-        aria-label="Barra Lateral de Navegação Principal da Aerocode"
-        >aqui é a sidebar
-            
+        <aside
+            className="fixed top-0 left-0 h-full w-64 bg-white z-30 flex flex-col border-r border-gray-100"
+            aria-label="Barra Lateral de Navegação Principal da Aerocode"
+        >
             {/* Topo da Sidebar: Logo */}
-            <div className="p-4 border-b border-info/30 h-20 flex items-center justify-center bg-primary/5">
-                <span className="text-xl font-bold text-primary">AEROCODE</span> 
+            <div className="p-4 border-b border-gray-100 h-20 flex items-center justify-center">
+                <span className="text-xl text-gray-800 font-mono font-bold">aerocode</span>
             </div>
 
             {/* Links de Navegação */}
             <nav className="flex-grow p-2 space-y-1">
                 {navigationItems.map((item) => {
                     if (!userCanAccess(item.minPermission)) return null
-                    
+
+                    const isActive = location.pathname === item.path
+
                     return (
-                        <Link 
-                        key={item.name}
-                        to={item.path}
-                        className="flex items-center p-3 text-sm font-medium text-info hover:bg-accent/10 hover:text-primary rounded-lg transition-colors duration-150"
+                        <Link
+                            key={item.name}
+                            to={item.path}
+                            className={`flex items-center p-3 text-sm font-medium rounded transition-colors duration-150
+                                ${isActive ? "bg-gray-100 text-gray-900" : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"}`}
                         >
-                            {/* O ÍCONE AGORA É RENDERIZADO COMO UM COMPONENTE */}
-                            <span className="mr-3 text-lg">{item.icon}</span> 
+                            <span className="mr-3 text-lg">{item.icon}</span>
                             <span>{item.name}</span>
                         </Link>
                     )
@@ -95,25 +83,25 @@ const Sidebar: React.FC = () => {
             </nav>
 
             {/* Base da Sidebar: Informações e Logout */}
-            <div className="p-4 border-t border-info/30">
-                <div className="flex items-center p-2 text-sm text-info/70">
-                    <span className="w-8 h-8 rounded-full bg-primary/20 mr-3 flex items-center justify-center text-primary font-semibold">
+            <div className="p-4 border-t border-gray-100">
+                <div className="flex items-center p-2 text-sm text-gray-500">
+                    <span className="w-8 h-8 rounded-full bg-gray-100 mr-3 flex items-center justify-center text-gray-800 font-semibold">
                         {user.name[0]}
                     </span>
                     <div>
-                        <p className="font-semibold text-primary">{user.name}</p>
-                        <p className="text-xs text-info/90">{user.nivelPermissao}</p>
+                        <p className="font-semibold text-gray-800">{user.name}</p>
+                        <p className="text-xs text-gray-400">{user.nivelPermissao}</p>
                     </div>
                 </div>
-                <button 
+               <button
                     onClick={() => console.log('Logout action')}
-                    className="w-full mt-2 p-2 text-sm text-center text-danger hover:bg-danger/10 rounded-lg transition-colors"
-                    >
-                    Sair / Logout
+                    className="w-full mt-2 p-2 text-sm text-center text-red-600 hover:bg-red-50 rounded flex items-center justify-center gap-2 transition-colors"
+                >
+                    <FaSignOutAlt className="text-red-600" />
+                    Logout
                 </button>
             </div>
         </aside>
     )
 }
-
 export default Sidebar
