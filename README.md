@@ -56,7 +56,7 @@ Utilize as credenciais simuladas abaixo para testar os diferentes fluxos de usu�
 
 1.  Clone o repositório:
     ```bash
-    git clone [URL_DO_SEU_REPOSITORIO]
+    git clone https://github.com/lais-zanardi/av2.git
     cd aerocode-frontend
     ```
 2.  Instale as dependências:
