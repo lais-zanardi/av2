@@ -20,8 +20,8 @@ interface SidebarItem {
 
 const navigationItems: SidebarItem[] = [
     { name: 'Administração', icon: <FaUserShield />, path: '/admin/users', minPermission: 'ADMINISTRADOR' },
-    { name: 'Aeronaves', icon: <FaPlane />, path: '/aeronaves', minPermission: 'ENGENHEIRO' },
-    { name: 'Etapas Prod.', icon: <FaClipboardList />, path: '/etapas', minPermission: 'OPERADOR' },
+    { name: 'Aeronaves', icon: <FaPlane />, path: '/aeronaves', minPermission: 'OPERADOR' },
+    { name: 'Etapas de Produção', icon: <FaClipboardList />, path: '/etapas', minPermission: 'OPERADOR' },
     { name: 'Peças', icon: <FaCogs />, path: '/pecas', minPermission: 'OPERADOR' },
     { name: 'Relatórios', icon: <FaFileAlt />, path: '/relatorios', minPermission: 'ENGENHEIRO' },
     { name: 'Testes', icon: <FaVial />, path: '/testes', minPermission: 'ENGENHEIRO' },
@@ -60,7 +60,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             >
 
                 {/* Topo da Sidebar: Logo e Botão Fechar (Mobile) */}
-                <div className="pl-3 gap-x-5 border-b border-gray-100 h-20 flex items-center justify-between">
+                <Link to='/' className="pl-3 gap-x-5 border-b border-gray-100 h-20 flex items-center justify-between">
                     <span className="text-xl text-gray-800 font-mono font-bold">aerocode</span>
                     <img
                         src="src/assets/img-aerocode.png"
@@ -69,7 +69,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     />
                     <button onClick={onClose} className="hidden p-2 hover:bg-gray-100">
                     </button>
-                </div>
+                </Link>
 
                 {/* Links de Navegação */}
                 <nav className="flex-grow p-2 space-y-1">

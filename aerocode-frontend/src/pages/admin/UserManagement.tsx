@@ -1,9 +1,9 @@
 import React, { useMemo, useState } from 'react'
-import GenericTable, { type TableColumn } from '../components/ui/GenericTable'
-import Button from '../components/forms/Button'
-import { FaEdit, FaPlus } from 'react-icons/fa'
+import GenericTable, { type TableColumn } from '../../components/ui/GenericTable'
+import Button from '../../components/forms/Button'
+import { FaEdit, FaUserPlus } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom' 
-import type { NivelPermissao, Funcionario } from '../components/types/Funcionario'
+import type { NivelPermissao, Funcionario } from '../../components/types/Funcionario'
 
 const NivelBadge: React.FC<{ nivel: NivelPermissao }> = ({ nivel }) => {
     let colorClass = ''
@@ -45,17 +45,10 @@ const UserManagement: React.FC = () => {
     const [selectedFuncionario, setSelectedFuncionario] = useState<Funcionario | null>(null)
 
     const handleEdit = (funcionario: Funcionario) => {
-        console.log(`Abrindo tela de edição para o funcionário ID: ${funcionario.id}`)
+        
         navigate(`/admin/users/edit/${funcionario.id}`)
-        alert(`Abrir formulário de edição para ${funcionario.nome}`)
+        
     }
-
-    const handleCreateNew = () => {
-        console.log('Navegando para a tela de novo usuário.')
-        navigate('/admin/users/new')
-        alert('Abrir formulário para criar novo usuário')
-    }
-
 
     const columns: TableColumn<Funcionario>[] = useMemo(() => [
         { 
@@ -90,7 +83,7 @@ const UserManagement: React.FC = () => {
     ], [])
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6  mt-20 p-6 w-full  shadow-md bg-white">
             <GenericTable
                 data={mockFuncionarios}
                 columns={columns}
@@ -98,11 +91,11 @@ const UserManagement: React.FC = () => {
             />
             <div className="flex justify-start"> 
                 <Button 
-                    onClick={handleCreateNew}
+                    onClick={() => navigate(`/admin/users/new`) }
                     variant="primary"
                     size="lg"
                 >
-                    <FaPlus className="mr-2" />
+                    <FaUserPlus className="mr-2" />
                     Novo Funcionário
                 </Button>
             </div>
