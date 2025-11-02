@@ -1,18 +1,29 @@
-import './App.css'
-import Login from './pages/Login'
-import { useAuth } from './context/AuthContext'
+import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import MainLayout from './components/layout/MainLayout'
+import Login from './pages/Login'
+import UserManagement from './pages/UserManagement'
+import { useAuth } from './context/AuthContext'
+import Home from './pages/Home'
 
-export default function App() {
-  const { isAuthenticated } = useAuth()
-  return (
-   <Routes>
-      
+const App: React.FC = () => {
+    const { isAuthenticated } = useAuth() 
+
+    return (
+        <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/*" element={isAuthenticated ? <MainLayout /> : <Navigate to="/login" />}>
-                {/*adicionar rotas filhas aqui*/}
+            <Route 
+                path="/" 
+                element={isAuthenticated ? <MainLayout /> : <Navigate to="/login" />} 
+            >
+                <Route index element={<Home />} /> 
+                <Route path="admin/users" element={<UserManagement />} />
+                <Route path="aeronaves" element={<p>Página de Listagem de Aeronaves</p>} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+                
             </Route>
         </Routes>
-  )
+    )
 }
+
+export default App
