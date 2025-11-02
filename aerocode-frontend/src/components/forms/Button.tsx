@@ -11,7 +11,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const getVariantClasses = (variant: ButtonProps['variant']): string => {
     switch (variant) {
         case 'primary':
-            return 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500';
+            return 'bg-[#2b52cc] text-white hover:bg-[#2b42cc] focus:ring-blue-500';
         case 'secondary':
             return 'bg-gray-200 text-gray-800 hover:bg-gray-300 focus:ring-gray-400';
         case 'danger':
