@@ -36,12 +36,13 @@ const App: React.FC = () => {
                 <Route path="aeronaves" element={<AeronaveManagement />} />
                 <Route path="aeronaves/new" element={<AeronaveCreateForm />} />
                 <Route path="/aeronave/edit/:codigo" element={<AeronaveUpdateForm />} />
-                <Route path="/aeronaves/details/:codigo" element={<AeronaveDetails />} />
+                <Route path="/aeronave/details/:codigo" element={<AeronaveDetails />} />
                 <Route path="/etapas" element={<Etapas />} />
                 <Route path="/etapas/:etapaId" element={<EtapaDetails />} />
                 <Route path="/pecas" element={<PecaManagement />} />
                 <Route path="/pecas/new" element={<PecaCreateForm />} />
-                <Route path="/pecas/edit/:id" element={<PecaCreateForm />} />
+                {/* <Route path="/pecas/edit/:id" element={<PecaUp />} /> */}
+                {/* <Route path="/pecas/details/:id" element={<Peca} */}
                <Route path="/testes" element={<TestManagement />}/>
                <Route path="/testes/record/:id" element={<TestRecordForm />}/>
                <Route path="/relatorios" element={<RelatorioManagement />}/>
