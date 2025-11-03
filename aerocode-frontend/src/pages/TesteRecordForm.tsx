@@ -5,41 +5,8 @@ import Select from '../components/forms/Select'
 import Button from '../components/forms/Button'
 import { FaSave, FaTimes, FaVial, FaPlane, FaCalendarAlt, FaUserAlt } from 'react-icons/fa'
 import { useAuth } from '../context/AuthContext'
-
-type ResultadoTeste = 'PENDENTE' | 'APROVADO' | 'REPROVADO'
-type TipoTeste = 'ELÉTRICO' | 'HIDRÁULICO' | 'ESTRUTURAL' | 'DE VOO' | 'SOFTWARE'
-
-interface TesteDetails {
-    id: number
-    aeronaveCodigo: string
-    tipo: TipoTeste
-    dataProgramada: string
-    responsavelNome: string
-    statusAtual: ResultadoTeste 
-}
-
-interface TesteRecordFormData {
-    id: number 
-    dataRealizacao: string
-    resultado: 'APROVADO' | 'REPROVADO' | '' 
-    observacoes: string
-}
-
-const RESULTADO_REGISTRO_OPCOES = [
-    { value: '', label: 'Selecione o Resultado' },
-    { value: 'APROVADO', label: 'APROVADO' },
-    { value: 'REPROVADO', label: 'REPROVADO' },
-]
-
-const mockFetchTestDetails = (id: number): TesteDetails | null => {
-    const mockDB: TesteDetails[] = [
-        { id: 1, aeronaveCodigo: 'E-175', tipo: 'ELÉTRICO', dataProgramada: '2025-05-20', responsavelNome: 'Carlos Souza', statusAtual: 'APROVADO' },
-        { id: 2, aeronaveCodigo: 'E-175', tipo: 'HIDRÁULICO', dataProgramada: '2025-05-30', responsavelNome: 'Carlos Souza', statusAtual: 'REPROVADO' },
-        { id: 3, aeronaveCodigo: 'A-350', tipo: 'ESTRUTURAL', dataProgramada: '2025-07-10', responsavelNome: 'Ana Lima', statusAtual: 'PENDENTE' },
-        { id: 4, aeronaveCodigo: 'F-35', tipo: 'DE VOO', dataProgramada: '2025-09-01', responsavelNome: 'João Ribeiro', statusAtual: 'PENDENTE' },
-    ]
-    return mockDB.find(t => t.id === id) || null
-}
+import type { Teste, ResultadoTeste, TipoTeste } from '../components/types/Teste'
+import { useTestes, RESULTADO_REGISTRO_OPCOES } from '../context/TesteContext'
 
 const TestRecordForm: React.FC = () => {
     const navigate = useNavigate()
@@ -47,16 +14,17 @@ const TestRecordForm: React.FC = () => {
     const params = useParams()
     const testeIdParam = params.id 
     const testeId = testeIdParam ? parseInt(testeIdParam, 10) : null
-    const [testDetails, setTestDetails] = useState<TesteDetails | null>(null)
-    const [formData, setFormData] = useState<TesteRecordFormData>({
-        id: testeId || 0,
-        dataRealizacao: new Date().toISOString().split('T')[0],
-        resultado: '',
-        observacoes: '',
-    })
+    // const [testDetails, setTestDetails] = useState<TesteDetails | null>(null)
+    // const [formData, setFormData] = useState<TesteRecordFormData>({
+    //     id: testeId || 0,
+    //     dataRealizacao: new Date().toISOString().split('T')[0],
+    //     resultado: '',
+    //     observacoes: '',
+    // })
     const [loading, setLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const { getTesteById, recordTestResult } = useTestes()
 
     useEffect(() => {
         if (!testeId) {
@@ -68,11 +36,11 @@ const TestRecordForm: React.FC = () => {
         setLoading(true)
         setError(null)
         
-        const fetchedDetails = mockFetchTestDetails(testeId)
+        const fetchedDetails = getTesteById(testeId)
         
         if (fetchedDetails) {
-            if (fetchedDetails.statusAtual !== 'PENDENTE') {
-                setError(`Este teste já foi ${fetchedDetails.statusAtual}. Não é possível registrar novamente.`)
+            if (fetchedDetails.resultado !== 'PENDENTE') {
+                setError(`Este teste já foi ${fetchedDetails.resultado}. Não é possível registrar novamente.`)
             }
             setTestDetails(fetchedDetails)
             setFormData(prev => ({ ...prev, id: fetchedDetails.id }))
@@ -80,7 +48,7 @@ const TestRecordForm: React.FC = () => {
             setError(`Teste com ID ${testeId} não encontrado.`)
         }
         setLoading(false)
-    }, [testeId])
+    }, [testeId, getTesteById])
 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -94,39 +62,30 @@ const TestRecordForm: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         
-        if (isSaving || loading || error || !testDetails) return
-
-        
-        if (!formData.resultado || !formData.dataRealizacao) {
-            setError("O resultado e a data de realização são obrigatórios.")
+       if (isSaving || loading || error || !testDetails || !formData.resultado) {
+            setError("O resultado é obrigatório.")
             return
         }
 
         setIsSaving(true)
-        setError(null)
         
-        
-        console.log("Registrando resultado do teste:", {
-            ...formData,
-            responsavelRegistro: user?.nome || 'Usuário Desconhecido'
-        })
-        await new Promise(resolve => setTimeout(resolve, 1500))
-        
-        setIsSaving(false)
-        alert(`Resultado do teste ${testDetails.id} (${testDetails.tipo}) registrado com sucesso como ${formData.resultado}!`)
-        
-        
-        navigate('/testes') 
-    }
+        try {
+            recordTestResult(
+                testDetails.id, 
+                formData.dataRealizacao, 
+                formData.resultado, 
+                formData.observacoes
+            )
 
-    if (loading) {
-        return <div className="text-center p-10 text-gray-500">Carregando detalhes do teste...</div>
-    }
+            setIsSaving(false)
+            alert(`Resultado do teste ${testDetails.id} (${testDetails.tipo}) registrado com sucesso!`)
+            navigate('/testes') 
 
-    if (error || !testDetails) {
-        return <div className="text-center p-10 text-red-600 font-semibold">{error || "Teste não encontrado ou inválido."}</div>
+        } catch (err: any) {
+            setIsSaving(false)
+            setError(err.message || "Erro ao registrar resultado.")
+        }
     }
-
     return (
         <div className="bg-white p-6 mt-20 max-w-4xl mx-auto">
             

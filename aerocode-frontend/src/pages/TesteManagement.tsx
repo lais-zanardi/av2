@@ -6,43 +6,8 @@ import Input from '../components/forms/Input'
 import Select from '../components/forms/Select'
 import { useAuth } from '../context/AuthContext'
 import { FaPlus, FaSearch, FaVial, FaCheckCircle, FaTimesCircle, FaCalendarAlt } from 'react-icons/fa'
-
-type ResultadoTeste = 'PENDENTE' | 'APROVADO' | 'REPROVADO'
-type TipoTeste = 'ELÉTRICO' | 'HIDRÁULICO' | 'ESTRUTURAL' | 'DE VOO' | 'SOFTWARE'
-
-interface Teste {
-    id: number
-    aeronaveCodigo: string 
-    tipo: TipoTeste
-    dataProgramada: string
-    dataRealizacao?: string
-    resultado: ResultadoTeste
-    responsavelNome: string
-}
-
-const mockTestes: Teste[] = [
-    { id: 1, aeronaveCodigo: 'E-175', tipo: 'ELÉTRICO', dataProgramada: '2025-05-20', dataRealizacao: '2025-05-25', resultado: 'APROVADO', responsavelNome: 'Carlos Souza' },
-    { id: 2, aeronaveCodigo: 'E-175', tipo: 'HIDRÁULICO', dataProgramada: '2025-05-30', dataRealizacao: '2025-06-01', resultado: 'REPROVADO', responsavelNome: 'Carlos Souza' },
-    { id: 3, aeronaveCodigo: 'A-350', tipo: 'ESTRUTURAL', dataProgramada: '2025-07-10', dataRealizacao: undefined, resultado: 'PENDENTE', responsavelNome: 'Ana Lima' },
-    { id: 4, aeronaveCodigo: 'F-35', tipo: 'DE VOO', dataProgramada: '2025-09-01', dataRealizacao: undefined, resultado: 'PENDENTE', responsavelNome: 'João Ribeiro' },
-    { id: 5, aeronaveCodigo: 'A-350', tipo: 'SOFTWARE', dataProgramada: '2025-07-15', dataRealizacao: '2025-07-16', resultado: 'APROVADO', responsavelNome: 'Ana Lima' },
-]
-
-const RESULTADO_OPCOES = [
-    { value: '', label: 'Todos os Resultados' },
-    { value: 'PENDENTE', label: 'Pendente' },
-    { value: 'APROVADO', label: 'Aprovado' },
-    { value: 'REPROVADO', label: 'Reprovado' },
-]
-
-const TIPO_TESTE_OPCOES = [
-    { value: '', label: 'Todos os Tipos' },
-    { value: 'ELÉTRICO', label: 'Elétrico' },
-    { value: 'HIDRÁULICO', label: 'Hidráulico' },
-    { value: 'ESTRUTURAL', label: 'Estrutural' },
-    { value: 'DE VOO', label: 'De Voo' },
-    { value: 'SOFTWARE', label: 'Software' },
-]
+import type { Teste, ResultadoTeste, TipoTeste } from '../components/types/Teste'
+import { useTestes, RESULTADO_OPCOES, TIPO_TESTE_OPCOES } from '../context/TesteContext'
 
 const TestManagement: React.FC = () => {
     const navigate = useNavigate()
@@ -51,9 +16,10 @@ const TestManagement: React.FC = () => {
     const [filterResultado, setFilterResultado] = useState<ResultadoTeste | ''>('')
     const [filterTipo, setFilterTipo] = useState<TipoTeste | ''>('')
     const canRecordTest = user?.nivelPermissao === 'ADMINISTRADOR' || user?.nivelPermissao === 'ENGENHEIRO'
+    const { testes } = useTestes()
 
     const filteredTestes = useMemo(() => {
-        return mockTestes.filter(teste => {
+        return testes.filter(teste => {
             const matchesSearch = searchTerm === '' || 
                                   teste.aeronaveCodigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                   teste.tipo.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -64,7 +30,7 @@ const TestManagement: React.FC = () => {
             
             return matchesSearch && matchesResultado && matchesTipo
         })
-    }, [searchTerm, filterResultado, filterTipo])
+    }, [searchTerm, filterResultado, filterTipo, testes])
 
     const columns: TableColumn<Teste>[] = useMemo(() => [
         { key: 'aeronaveCodigo', header: 'Aeronave', sortable: true },
@@ -135,7 +101,7 @@ const TestManagement: React.FC = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     Icon={FaSearch}
-                    className="flex-grow"
+                    className="grow"
                 />
                 <Select
                     label="Filtrar por Resultado"

@@ -2,16 +2,17 @@ import React, { useMemo, useState } from 'react'
 import GenericTable, { type TableColumn } from '../../components/ui/GenericTable'
 import Button from '../../components/forms/Button'
 import { FaEdit, FaUserPlus } from 'react-icons/fa'
-import { useNavigate } from 'react-router-dom' 
+import { useNavigate } from 'react-router-dom'
 import type { NivelPermissao, Funcionario } from '../../components/types/Funcionario'
+import { useFuncionarios } from '../../context/FuncionarioContext'
 
 const NivelBadge: React.FC<{ nivel: NivelPermissao }> = ({ nivel }) => {
     let colorClass = ''
-    let textColorClass = 'text-gray-900' 
-    
+    let textColorClass = 'text-gray-900'
+
     switch (nivel) {
         case 'ADMINISTRADOR':
-            colorClass = 'bg-purple-100' 
+            colorClass = 'bg-purple-100'
             textColorClass = 'text-purple-700'
             break
         case 'ENGENHEIRO':
@@ -32,47 +33,39 @@ const NivelBadge: React.FC<{ nivel: NivelPermissao }> = ({ nivel }) => {
     )
 }
 
-// Dados Mockados
-const mockFuncionarios: Funcionario[] = [
-    { id: 101, nome: 'Professor Xavier', nivel: 'ADMINISTRADOR', telefone: '(12) 98888-0001', endereco: '', usuario: 'prof.x' },
-    { id: 201, nome: 'Jean Grey', nivel: 'ENGENHEIRO', telefone: '(12) 98888-1111', endereco: 'Rua A', usuario: 'jean.g' },
-    { id: 202, nome: 'Ciclope', nivel: 'OPERADOR', telefone: '(12) 98888-2222', endereco: 'Rua B', usuario: 'ciclope' },
-    { id: 203, nome: 'Tempestade', nivel: 'OPERADOR', telefone: '(12) 98888-3333', endereco: 'Rua C', usuario: 'tempestade' },
-]
-
 const UserManagement: React.FC = () => {
     const navigate = useNavigate()
     const [selectedFuncionario, setSelectedFuncionario] = useState<Funcionario | null>(null)
-
+    const { funcionarios } = useFuncionarios()
     const handleEdit = (funcionario: Funcionario) => {
-        
+
         navigate(`/admin/users/edit/${funcionario.id}`)
-        
+
     }
 
     const columns: TableColumn<Funcionario>[] = useMemo(() => [
-        { 
-            key: 'id', 
-            header: 'ID', 
+        {
+            key: 'id',
+            header: 'ID',
             sortable: true,
         },
         { key: 'nome', header: 'Nome', sortable: true },
         { key: 'usuario', header: 'Usuário (Login)', sortable: false },
         { key: 'telefone', header: 'Contato', sortable: false },
-        { 
-            key: 'nivel', 
-            header: 'Nível', 
-            sortable: true, 
-            render: (item) => <NivelBadge nivel={item.nivel} /> 
+        {
+            key: 'nivel',
+            header: 'Nível',
+            sortable: true,
+            render: (item) => <NivelBadge nivel={item.nivel} />
         },
-        { 
-            key: 'actions', 
-            header: 'Ações', 
+        {
+            key: 'actions',
+            header: 'Ações',
             render: (item) => (
                 <div className="flex space-x-2">
-                    <button 
+                    <button
                         onClick={() => handleEdit(item)}
-                        title="Editar Funcionário" 
+                        title="Editar Funcionário"
                         className="primary p-1 transition-colors"
                     >
                         <FaEdit />
@@ -85,13 +78,13 @@ const UserManagement: React.FC = () => {
     return (
         <div className="space-y-6  mt-20 p-6 w-full  shadow-md bg-white">
             <GenericTable
-                data={mockFuncionarios}
+                data={funcionarios}
                 columns={columns}
-                onRowSelect={setSelectedFuncionario} 
+                onRowSelect={setSelectedFuncionario}
             />
-            <div className="flex justify-start"> 
-                <Button 
-                    onClick={() => navigate(`/admin/users/new`) }
+            <div className="flex justify-start">
+                <Button
+                    onClick={() => navigate(`/admin/users/new`)}
                     variant="primary"
                     size="lg"
                 >
@@ -99,7 +92,7 @@ const UserManagement: React.FC = () => {
                     Novo Funcionário
                 </Button>
             </div>
-            
+
             {selectedFuncionario && (
                 <div className="p-3 bg-blue-50 border-l-4 border-blue-500 rounded text-sm">
                     Selecionado: {selectedFuncionario.nome} ({selectedFuncionario.nivel})

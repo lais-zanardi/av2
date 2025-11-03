@@ -5,6 +5,7 @@ import Select from '../../components/forms/Select'
 import Button from '../../components/forms/Button'
 import type { Funcionario, NivelPermissao } from '../../components/types/Funcionario'
 import { FaUser, FaPhone, FaMapMarkerAlt, FaKey, FaSave, FaLock } from 'react-icons/fa'
+import { useFuncionarios } from '../../context/FuncionarioContext'
 
 const INITIAL_FORM_DATA: Partial<Funcionario> = {
     nome: '',
@@ -27,6 +28,7 @@ const UserCreateForm: React.FC = () => {
     const [confirmarSenha, setConfirmarSenha] = useState('')
     const [isSaving, setIsSaving] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const { createFuncionario } = useFuncionarios()
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData({
@@ -37,7 +39,7 @@ const UserCreateForm: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        
+
         if (isSaving) return
 
         if (senha !== confirmarSenha) {
@@ -52,19 +54,22 @@ const UserCreateForm: React.FC = () => {
 
         setIsSaving(true)
         setError(null)
-        
+
         const newUserPayload = {
             ...formData,
-            senha: senha, 
-            id: Math.random()*10, 
+            senha: senha,
+            id: 0,
         }
-        
-        console.log("Tentativa de criar novo usuário:", newUserPayload)
-        await new Promise(resolve => setTimeout(resolve, 1500))
-        
-        setIsSaving(false)
-        alert(`Novo funcionário '${formData.nome}' criado com sucesso! ID: ${newUserPayload.id}`)
-        navigate('/admin/users') 
+        try {
+            createFuncionario(newUserPayload)
+            setIsSaving(false)
+            alert(`Novo funcionário '${formData.nome}' criado com sucesso!`)
+            navigate('/admin/users') 
+
+        } catch (err: any) {
+            setIsSaving(false)
+            setError(err.message || "Erro ao criar usuário.")
+        }
     }
 
     return (
@@ -85,8 +90,8 @@ const UserCreateForm: React.FC = () => {
                 <div className="space-y-4">
                     <h3 className="text-lg font-medium border-b pb-2 mb-4 text-blue-700">2. Credenciais e Nível de Acesso</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-                        
-                        
+
+
                         <Input label="Usuário (Login)" name="usuario" type="text" value={formData.usuario || ''} onChange={handleChange} Icon={FaUser} required />
                         <Input label="Senha" type="password" value={senha} onChange={(e) => setSenha(e.target.value)} Icon={FaLock} required />
                         <Input label="Confirmar Senha" type="password" value={confirmarSenha} onChange={(e) => setConfirmarSenha(e.target.value)} Icon={FaLock} required />
@@ -107,7 +112,7 @@ const UserCreateForm: React.FC = () => {
                         <FaSave className="mr-2" />
                         Criar Funcionário
                     </Button>
-                    
+
                     <Button type="button" variant="secondary" onClick={() => navigate('/admin/users')}>
                         Cancelar e Voltar
                     </Button>

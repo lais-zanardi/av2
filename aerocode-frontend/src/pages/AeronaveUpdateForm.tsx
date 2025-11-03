@@ -4,9 +4,8 @@ import Input from '../components/forms/Input'
 import Select from '../components/forms/Select'
 import Button from '../components/forms/Button'
 import { FaPlane, FaCode, FaRulerCombined, FaUsers, FaArrowRight, FaSave, FaHashtag } from 'react-icons/fa'
-
-type TipoAeronave = 'COMERCIAL' | 'MILITAR'
-type StatusProducao = 'Em Produção' | 'Pronta' | 'Em Testes' | 'Entregue'
+import type { TipoAeronave, StatusProducao, Aeronave } from '../components/types/TipoAeronave'
+import { useAeronaves, TIPO_AERONAVE_OPCOES, STATUS_AERONAVE_OPCOES } from '../context/AeronaveContext'
 
 interface AeronaveData {
     codigo: string
@@ -15,27 +14,6 @@ interface AeronaveData {
     capacidade: number
     alcance: number
     status: StatusProducao
-}
-
-const TIPO_AERONAVE_OPCOES = [
-    { value: 'COMERCIAL', label: 'COMERCIAL' },
-    { value: 'MILITAR', label: 'MILITAR' },
-]
-
-const STATUS_OPCOES = [
-    { value: 'Em Produção', label: 'Em Produção' },
-    { value: 'Pronta', label: 'Pronta' },
-    { value: 'Em Testes', label: 'Em Testes' },
-    { value: 'Entregue', label: 'Entregue' },
-]
-
-const mockFetchAeronave = (codigo: string): AeronaveData | null => {
-    const mockDB: AeronaveData[] = [
-        { codigo: 'E175', modelo: 'EMB-175', tipo: 'COMERCIAL', capacidade: 88, alcance: 3700, status: 'Em Produção' },
-        { codigo: 'A350', modelo: 'Airbus A350', tipo: 'COMERCIAL', capacidade: 300, alcance: 15000, status: 'Pronta' },
-        { codigo: 'F35', modelo: 'Lockheed F-35', tipo: 'MILITAR', capacidade: 1, alcance: 2200, status: 'Em Testes' },
-    ]
-    return mockDB.find(a => a.codigo === codigo) || null
 }
 
 const AeronaveUpdateForm: React.FC = () => {
@@ -47,6 +25,8 @@ const AeronaveUpdateForm: React.FC = () => {
     const [loading, setLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
     const [error, setError] = useState<string | null>(null)
+        const { getAeronaveByCodigo, updateAeronave } = useAeronaves()
+    
 
     useEffect(() => {
         if (!codigoAeronave) {
@@ -58,7 +38,7 @@ const AeronaveUpdateForm: React.FC = () => {
         setLoading(true)
         setError(null)
         
-        const fetchedData = mockFetchAeronave(codigoAeronave)
+        const fetchedData = getAeronaveByCodigo(codigoAeronave)
         
         if (fetchedData) {
             setOriginalData(fetchedData)
@@ -68,7 +48,7 @@ const AeronaveUpdateForm: React.FC = () => {
         }
 
         setLoading(false)
-    }, [codigoAeronave]) 
+    }, [codigoAeronave, getAeronaveByCodigo]) 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target
@@ -86,12 +66,17 @@ const AeronaveUpdateForm: React.FC = () => {
         setIsSaving(true)
         setError(null)
         
-        console.log("Tentativa de atualizar aeronave:", formData)
-        await new Promise(resolve => setTimeout(resolve, 1500))
-        
-        setIsSaving(false)
-        alert(`Aeronave ${originalData.codigo} atualizada com sucesso!`)
-        navigate('/aeronaves') 
+      try {
+            updateAeronave(originalData.codigo, formData as Aeronave) 
+
+            setIsSaving(false)
+            alert(`Aeronave ${originalData.codigo} atualizada com sucesso!`)
+            navigate('/aeronaves') 
+
+        } catch (err: any) {
+            setIsSaving(false)
+            setError(err.message || "Erro ao atualizar aeronave.")
+        }
     }
 
     if (loading) {
@@ -137,7 +122,7 @@ const AeronaveUpdateForm: React.FC = () => {
                         <Select 
                             label="Status" 
                             name="status"
-                            options={STATUS_OPCOES} 
+                            options={STATUS_AERONAVE_OPCOES} 
                             value={status || ''} 
                             onChange={handleChange}
                             className="md:col-span-2"

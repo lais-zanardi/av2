@@ -5,17 +5,12 @@ import Button from '../components/forms/Button'
 import { useNavigate } from 'react-router-dom' 
 import { useAuth } from '../context/AuthContext'
 import type { Aeronave } from '../components/types/TipoAeronave'
-
-const mockAeronaves: Aeronave[] = [
-    { codigo: 'E175', modelo: 'EMB-175', tipo: 'COMERCIAL', capacidade: 88, status: 'Em Produção' },
-    { codigo: 'A350', modelo: 'Airbus A350', tipo: 'COMERCIAL', capacidade: 300, status: 'Pronta' },
-    { codigo: 'F35', modelo: 'Lockheed F-35', tipo: 'MILITAR', capacidade: 1, status: 'Em Testes' },
-    { codigo: 'G280', modelo: 'Gulfstream G280', tipo: 'COMERCIAL', capacidade: 10, status: 'Entregue' },
-]
+import { useAeronaves } from '../context/AeronaveContext'
 
 const AeronaveManagement: React.FC = () => {
     const navigate = useNavigate()
     const { user } = useAuth()
+    const { aeronaves } = useAeronaves()
     const canManage = user?.nivelPermissao === 'ADMINISTRADOR' || user?.nivelPermissao === 'ENGENHEIRO'
     const isOperator = user?.nivelPermissao === 'OPERADOR'
    
@@ -42,7 +37,7 @@ const AeronaveManagement: React.FC = () => {
             render: (item) => (
                 <div className="flex space-x-2 justify-end">
                     <Button 
-                        onClick={() => navigate(`/aeronaves/details/${item.codigo}`)}
+                        onClick={() => navigate(`/aeronave/details/${item.codigo}`)}
                         title="Ver Detalhes" 
                         variant={isOperator ? "primary" : "secondary"}
                         size="sm"
@@ -84,7 +79,7 @@ const AeronaveManagement: React.FC = () => {
             </div>
 
             <GenericTable
-                data={mockAeronaves}
+                data={aeronaves}
                 columns={columns}
             />
         </div>

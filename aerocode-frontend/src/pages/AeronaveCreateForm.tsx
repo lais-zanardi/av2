@@ -4,15 +4,17 @@ import Input from '../components/forms/Input'
 import Select from '../components/forms/Select'
 import Button from '../components/forms/Button'
 import { FaPlane, FaCode, FaRulerCombined, FaUsers, FaArrowRight, FaSave, FaHashtag } from 'react-icons/fa'
-
-type TipoAeronave = 'COMERCIAL' | 'MILITAR'
+import { TIPO_AERONAVE_OPCOES, useAeronaves } from '../context/AeronaveContext'
+import type { Aeronave, StatusProducao, TipoAeronave } from '../components/types/TipoAeronave'
 
 interface AeronaveFormData {
     codigo: string
     modelo: string
     tipo: TipoAeronave | ''
     capacidade: number | ''
-    alcance: number | '' 
+    alcance: number | ''
+    status: StatusProducao
+    
 }
 
 const INITIAL_FORM_DATA: AeronaveFormData = {
@@ -21,18 +23,16 @@ const INITIAL_FORM_DATA: AeronaveFormData = {
     tipo: '',
     capacidade: '',
     alcance: '',
+    status: 'Em Produção'
+    
 }
-
-const TIPO_AERONAVE_OPCOES = [
-    { value: 'COMERCIAL', label: 'COMERCIAL' },
-    { value: 'MILITAR', label: 'MILITAR' },
-]
 
 const AeronaveCreateForm: React.FC = () => {
     const navigate = useNavigate()
     const [formData, setFormData] = useState<AeronaveFormData>(INITIAL_FORM_DATA)
     const [isSaving, setIsSaving] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const { createAeronave } = useAeronaves()
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target
@@ -44,24 +44,27 @@ const AeronaveCreateForm: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        
+
         if (isSaving) return
         if (!formData.codigo || !formData.modelo || !formData.tipo) {
             setError("Os campos Código, Modelo e Tipo são obrigatórios.")
             return
         }
+        
+        try {
+            createAeronave(formData as Aeronave)
 
-        setIsSaving(true)
-        setError(null)
-        await new Promise(resolve => setTimeout(resolve, 1500))
-        setIsSaving(false)
-        alert(`Aeronave ${formData.codigo} criada com sucesso!`)
-        navigate('/aeronaves') 
+            setIsSaving(false)
+            alert(`Aeronave '${formData.codigo}' criada com sucesso!`)
+            navigate('/aeronaves') 
+        } catch (err: any) {
+            setIsSaving(false)
+            setError(err.message || "Erro ao criar aeronave.")
+        }
     }
-
     return (
         <div className="bg-white mt-20 p-6 w-full">
-            
+
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">Cadastrar Aeronave</h2>
             {error && <p className="text-sm text-red-600 mb-4 p-3 bg-red-50 rounded">{error}</p>}
 
@@ -75,9 +78,9 @@ const AeronaveCreateForm: React.FC = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
                         <Input label="Capacidade (Pax)" name="capacidade" type="number" value={formData.capacidade || ''} onChange={handleChange} Icon={FaUsers} min={1} />
-                        
+
                         <Input label="Alcance (km)" name="alcance" type="number" value={formData.alcance || ''} onChange={handleChange} Icon={FaRulerCombined} min={0} />
-                        
+
                         <Select
                             label="Tipo de Aeronave"
                             name="tipo"
@@ -97,7 +100,7 @@ const AeronaveCreateForm: React.FC = () => {
                             <Input label="Envergadura" placeholder="64.8 m" type="text" />
                         </div>
                     </div>
-                    
+
                     <div className="space-y-4">
                         <h3 className="text-lg font-medium border-b pb-2 text-blue-700">3. Status Inicial</h3>
                         <Select label="Status Inicial" options={[{ label: 'Em Projeto', value: 'projeto' }]} />
@@ -110,7 +113,7 @@ const AeronaveCreateForm: React.FC = () => {
                         <FaSave className="mr-2" />
                         Salvar Aeronave
                     </Button>
-                    
+
                     <Button type="button" variant="secondary" onClick={() => navigate('/aeronaves')}>
                         Cancelar
                     </Button>

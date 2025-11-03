@@ -1,5 +1,3 @@
-// src/pages/Reporting/ReportManagement.tsx
-
 import React, { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import GenericTable, { type TableColumn } from '../components/ui/GenericTable'
@@ -8,47 +6,14 @@ import Input from '../components/forms/Input'
 import Select from '../components/forms/Select'
 import { useAuth } from '../context/AuthContext'
 import { FaPlus, FaSearch, FaDownload, FaCloudUploadAlt, FaFileAlt, FaSyncAlt } from 'react-icons/fa'
-import { GenerateReportModal } from '../components/modals/RelatorioModal' // Importar o modal
-
-type TipoRelatorio = 'PRODUCAO_GERAL' | 'POR_AERONAVE' | 'PECA_LOGISTICA' | 'TESTES_QUALIDADE'
-type StatusRelatorio = 'GERADO' | 'PENDENTE' | 'ERRO'
-
-interface Relatorio {
-    id: number
-    nome: string 
-    tipo: TipoRelatorio
-    dataGeracao: string
-    geradoPor: string
-    status: StatusRelatorio
-    linkDownload?: string 
-}
-
-const mockRelatorios: Relatorio[] = [
-    { id: 1, nome: 'Relatório Final Aeronave E-175', tipo: 'POR_AERONAVE', dataGeracao: '2025-06-10', geradoPor: 'Admin User', status: 'GERADO', linkDownload: '/reports/e175_final.pdf' },
-    { id: 2, nome: 'Logística de Peças Mensal (Maio)', tipo: 'PECA_LOGISTICA', dataGeracao: '2025-06-01', geradoPor: 'Engenheiro Chefe', status: 'GERADO', linkDownload: '/reports/pecas_maio.pdf' },
-    { id: 3, nome: 'Relatório de Testes de Voo A-350', tipo: 'TESTES_QUALIDADE', dataGeracao: '2025-06-15', geradoPor: 'QA Manager', status: 'PENDENTE' },
-    { id: 4, nome: 'Produção Geral Q2 2025', tipo: 'PRODUCAO_GERAL', dataGeracao: '2025-07-01', geradoPor: 'Admin User', status: 'ERRO' },
-]
-
-const TIPO_RELATORIO_OPCOES = [
-    { value: '', label: 'Todos os Tipos' },
-    { value: 'PRODUCAO_GERAL', label: 'Produção Geral' },
-    { value: 'POR_AERONAVE', label: 'Por Aeronave' },
-    { value: 'PECA_LOGISTICA', label: 'Logística de Peças' },
-    { value: 'TESTES_QUALIDADE', label: 'Testes de Qualidade' },
-]
-
-const STATUS_RELATORIO_OPCOES = [
-    { value: '', label: 'Todos os Status' },
-    { value: 'GERADO', label: 'Gerado' },
-    { value: 'PENDENTE', label: 'Pendente' },
-    { value: 'ERRO', label: 'Erro' },
-]
-
+import { GenerateReportModal } from '../components/modals/RelatorioModal'
+import type { Relatorio, TipoRelatorio, StatusRelatorio } from '../components/types/Relatorio'
+import { useRelatorios, TIPO_RELATORIO_OPCOES, STATUS_RELATORIO_OPCOES } from '../context/RelatorioContext'
 
 const ReportManagement: React.FC = () => {
     const navigate = useNavigate()
     const { user } = useAuth()
+    const { relatorios } = useRelatorios()
 
     const [searchTerm, setSearchTerm] = useState('')
     const [filterTipo, setFilterTipo] = useState<TipoRelatorio | ''>('')
@@ -60,7 +25,7 @@ const ReportManagement: React.FC = () => {
 
 
     const filteredRelatorios = useMemo(() => {
-        return mockRelatorios.filter(relatorio => {
+        return relatorios.filter(relatorio => {
             const matchesSearch = searchTerm === '' || 
                                   relatorio.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
                                   relatorio.geradoPor.toLowerCase().includes(searchTerm.toLowerCase())
@@ -70,7 +35,7 @@ const ReportManagement: React.FC = () => {
             
             return matchesSearch && matchesTipo && matchesStatus
         })
-    }, [searchTerm, filterTipo, filterStatus])
+    }, [searchTerm, filterTipo, filterStatus, relatorios])
 
 
     const columns: TableColumn<Relatorio>[] = useMemo(() => [
